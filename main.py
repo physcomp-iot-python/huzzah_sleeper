@@ -92,7 +92,7 @@ while True:
         rtc.irq(trigger=rtc.ALARM0, wake=machine.DEEPSLEEP)
 
         # set RTC.ALARM0 to fire after X seconds (waking the device)
-        rtc.alarm(rtc.ALARM0, 3)
+        rtc.alarm(rtc.ALARM0, 10000)
 
         # put the device to sleep
         machine.deepsleep()
