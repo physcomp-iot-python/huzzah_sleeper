@@ -17,6 +17,9 @@ SLEEP_SECONDS=3
 ESSID    = 'dolphnet'
 PASSWORD = 'mcmlxix1969'
 
+#ESSID    = 'jpl'
+#PASSWORD = 'mars-adventure'
+
 #-Adafruit IO settings
 USER_NAME = "donblair" #PLEASE CHANGE TO YOUR AIO USERNAME
 AIO_KEY = '3515b3ecee734780927d7f4ab1654917'  #PLEASE CHANGE TO YOUR AIO KEY
@@ -102,8 +105,9 @@ while True:
         
             
         adc_value = get_adc()
-        print("adc: %0.3f" % adc_value)
-        voltage_feed.post(adc_value)
+        voltage=adc_value*20.5
+        print("adc: %0.3f" % voltage)
+        voltage_feed.post(voltage)
         blink(1)
         
         
@@ -136,7 +140,7 @@ while True:
         rtc.irq(trigger=rtc.ALARM0, wake=machine.DEEPSLEEP)
 
         # set RTC.ALARM0 to fire after X seconds (waking the device)
-        rtc.alarm(rtc.ALARM0, 10000)
+        rtc.alarm(rtc.ALARM0, 60000)
 
         # put the device to sleep
         machine.deepsleep()
