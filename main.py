@@ -5,8 +5,11 @@ import time
 import sys
 from analogio import AnalogIn
 import gc
-
+#from adafruit_onewire.bus import OneWireBus
+#import adafruit_ds18x20
 import adafruit_io
+import adafruit_dht
+
 
 SLEEP_SECONDS=3
 
@@ -23,13 +26,30 @@ AIO_KEY = '3515b3ecee734780927d7f4ab1654917'  #PLEASE CHANGE TO YOUR AIO KEY
 # Each sensor's' feed should have a unique name!
 
 ANALOG_FEED_NAME = 'analog-feed-test-number-1' #PLEASE CHANGE TO YOUR AIO FEED NAME
-analog_feed = adafruit_io.Feed(user_name = USER_NAME,
+
+voltage_feed = adafruit_io.Feed(user_name = USER_NAME,
                                key = AIO_KEY,
-                               feed_name = ANALOG_FEED_NAME,
+                               feed_name = 'voltage',
                                )
-print("Feed: {}".format(ANALOG_FEED_NAME))
-print("headers: {}".format(analog_feed.headers))
-print("post_url: {}".format(analog_feed.post_url))
+                               
+temp_feed = adafruit_io.Feed(user_name = USER_NAME,
+                               key = AIO_KEY,
+                               feed_name = 'temperature',
+                               )
+                               
+humidity_feed = adafruit_io.Feed(user_name = USER_NAME,
+                               key = AIO_KEY,
+                               feed_name = 'humidity',
+                               )
+                               
+external_temp_feed = adafruit_io.Feed(user_name = USER_NAME,
+                               key = AIO_KEY,
+                               feed_name = 'external_temp',
+                               )
+                                                              
+#print("Feed: {}".format(ANALOG_FEED_NAME))
+#print("headers: {}".format(analog_feed.headers))
+#print("post_url: {}".format(analog_feed.post_url))
 
 # some utility functions
 def get_adc():
@@ -67,26 +87,50 @@ def go_to_sleep(seconds):
     # put the device to sleep
     machine.deepsleep()
 
+dht = adafruit_dht.DHT22(board.GPIO4)
+#ow_bus = OneWireBus(board.GPIO5)
+#devices = ow_bus.scan()
+#ds18b20 = adafruit_ds18x20.DS18X20(ow_bus, devices[0])
 
 while True:
+    
     
     do_connect() #connect to network
 
 
     try:
+        
+            
         adc_value = get_adc()
         print("adc: %0.3f" % adc_value)
-        analog_feed.post(adc_value)
-        blink(0.5)
-        #time.sleep(10)
-        gc.collect()
-        blink(.2)
+        voltage_feed.post(adc_value)
+        blink(1)
+        
+        
+        temp = dht.temperature
+        print("temp: %0.3f" % temp)
+        temp_feed.post(temp)
+        blink(1)
+        
+        humidity = dht.humidity
+        print("humidity: %0.3f" % humidity)
+        humidity_feed.post(humidity)
+        blink(1)
+
+
+        #
+        #external_temp = ds18b20.temperature
+        #print("external_temp: %0.3f" % external_temp)
+        #external_temp_feed.post(external_temp)
+        #blink(1)
         
         for i in range(0,5):
             blink(.2)
             time.sleep(3)
             print(i)
-
+        
+        gc.collect()
+        
         # configure RTC.ALARM0 to be able to wake the device
         rtc = machine.RTC()
         rtc.irq(trigger=rtc.ALARM0, wake=machine.DEEPSLEEP)
